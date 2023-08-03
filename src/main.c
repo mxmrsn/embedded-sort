@@ -16,7 +16,7 @@ void insertionSort(struct Point arr[], int n, char coordinate, int ascending) {
     struct Point key;
     for (i = 1; i < n; i++) {
         key = arr[i];
-        j = i - 1;
+        j = i-1;
         while (j >= 0 && (                                                               // if j within array bounds
             (coordinate == 'x' && (ascending ? arr[j].x > key.x : arr[j].x < key.x)) ||  // if coordinate == x, sort based on x, if ascending = 0, arr[j].x < key.x ...
             (coordinate == 'y' && (ascending ? arr[j].y > key.y : arr[j].y < key.y))     // if coordinate == y, sort based on y, if ascending = 1, arr[j].y > key.y ...
@@ -99,19 +99,19 @@ double timeFunction(void (*f)(struct Point arr[], int n, int eps), struct Point 
 }
 
 int main(int argc, char *argv[]) {
-    const char* filename = "C:/Users/memerson/Documents/code/embedded-sort/points.csv";
+    const char* filename = "C:/Users/memerson/Documents/code/embedded-sort/steve-points.csv";
 
     // Generate random points and evaluate performance
-    srand(time(NULL));
-    int n = 1000;
-    struct Point arr[n];
-    double timer1_elapsed = timeFunction(generateRandomPoints, arr, n, 10);
-    printf("Time to generate numbers: %f\n", timer1_elapsed);
+    // srand(time(NULL));
+    // int n = 1000;
+    // struct Point arr[n];
+    // double timer1_elapsed = timeFunction(generateRandomPoints, arr, n, 10);
+    // printf("Time to generate numbers: %f\n", timer1_elapsed);
 
     // Alternatively, sort points from csv file
-    // int n = 30; // known number of points in csv
-    // struct Point arr[n];
-    // readPointsFromCSV(filename, arr, n);
+    int n = 211; // known number of points in csv
+    struct Point arr[n];
+    readPointsFromCSV(filename, arr, n);
 
     printf("Unsorted Array: ");
     printArray(arr, n);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     printf("Time to sort: %f", time_elapsed);
     printf("\n");
 
-    savePointsToSCV("../sorted_points.csv", arr, n);
+    savePointsToSCV("../sorted_steve_points.csv", arr, n);
 
     return 0;
 }
