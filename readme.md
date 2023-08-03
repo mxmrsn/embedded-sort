@@ -59,3 +59,9 @@
    Within each row, it alternates between sorting the points' x-coordinates in ascending or descending order based on the `ascending` flag. After sorting each row, it toggles the `ascending` flag and moves to the next row.
 
 Overall, this code effectively sorts 2D points based on the specified coordinates and order using insertion sort and the raster scan approach.
+
+**Unsorted vs. Sorted Points**
+
+![unsorted](/resources/unsorted-points.jpg)
+
+![sorted](/resources/sorted-points.jpg)
