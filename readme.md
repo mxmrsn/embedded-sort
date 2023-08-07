@@ -54,14 +54,16 @@
        }
    }
    ```
-   This function sorts the array of `Point` structures using a raster scan approach. It first sorts all points based on the y-coordinate in descending order. Then, it iterates through the points, treating rows as points where the difference in y-coordinate (`dy`) is less than or equal to `eps`.
+   This function sorts the array of `Point` structures using a raster scan approach. It first sorts all points based on the y-coordinate in descending order. Then, it iterates through the points, defining rows as points where the difference in y-coordinate (`dy`) is less than or equal to `eps`.
 
    Within each row, it alternates between sorting the points' x-coordinates in ascending or descending order based on the `ascending` flag. After sorting each row, it toggles the `ascending` flag and moves to the next row.
 
-Overall, this code effectively sorts 2D points based on the specified coordinates and order using insertion sort and the raster scan approach.
+Overall, this code effectively sorts an arbitrary number of 2D points based on the specified coordinate direction and order using insertion sort and the raster scan approach.
 
-**Unsorted vs. Sorted Points**
+**Unsorted Points**
 
 ![unsorted](/resources/unsorted-points.jpg)
+
+**Sorted Points**
 
 ![sorted](/resources/sorted-points.jpg)
