@@ -39,7 +39,7 @@ void rasterScanSort(struct Point arr[], int n, int eps) {
             j++;
         }
         if (ascending) {
-            insertionSort(&arr[i], j-i, 'x', 1); // sort x in row ascending 
+            insertionSort(&arr[i], j-i, 'x', 1); // sort x in row ascending
         } else {
             insertionSort(&arr[i], j-i, 'x', 0); // sort x in row descending
         }
@@ -47,6 +47,50 @@ void rasterScanSort(struct Point arr[], int n, int eps) {
         i = j;
     }
 }
+
+void reverseAlternateRowsOnXJump(struct Point arr[], int n, int xJumpThreshold) {
+    int rowStart = 0;
+    int reverseRow = 0; // Flag to determine whether to reverse the row
+    
+    for (int i = 1; i < n; i++) {
+        if (abs(arr[i].x - arr[i - 1].x) > xJumpThreshold) {
+            if (reverseRow) {
+                // Reverse the points within the current row
+                int rowEnd = i - 1;
+                while (rowStart < rowEnd) {
+                    struct Point temp = arr[rowStart];
+                    arr[rowStart] = arr[rowEnd];
+                    arr[rowEnd] = temp;
+                    rowStart++;
+                    rowEnd--;
+                }
+            }
+            reverseRow = !reverseRow; // Toggle the flag for next row
+            rowStart = i; // Set the new row starting point
+        }
+    }
+    
+    // Reverse the last row (if necessary and flagged)
+    if (reverseRow) {
+        int rowEnd = n - 1;
+        while (rowStart < rowEnd) {
+            struct Point temp = arr[rowStart];
+            arr[rowStart] = arr[rowEnd];
+            arr[rowEnd] = temp;
+            rowStart++;
+            rowEnd--;
+        }
+    }
+}
+
+
+
+void serpentineScanSort(struct Point arr[], int n, int eps) {
+    rasterScanSort(arr, n, eps);
+    reverseAlternateRowsOnXJump(arr, n, 1000);
+}
+
+
 
 void printArray(struct Point arr[], int n) {
     int i;
@@ -99,7 +143,7 @@ double timeFunction(void (*f)(struct Point arr[], int n, int eps), struct Point 
 }
 
 int main(int argc, char *argv[]) {
-    const char* filename = "C:/Users/memerson/Documents/code/embedded-sort/steve-points.csv";
+    const char* filename = "C:/Users/memerson/Documents/code/embedded-sort/steve-points2.csv";
 
     // Generate random points and evaluate performance
     // srand(time(NULL));
@@ -117,8 +161,8 @@ int main(int argc, char *argv[]) {
     printArray(arr, n);
     printf("\n");
 
-    int eps = 10;
-    double time_elapsed = timeFunction(rasterScanSort, arr, n, eps);
+    int eps = 1;
+    double time_elapsed = timeFunction(serpentineScanSort, arr, n, eps);
 
     printf("Sorted Array: ");
     printArray(arr, n);
@@ -126,7 +170,7 @@ int main(int argc, char *argv[]) {
     printf("Time to sort: %f", time_elapsed);
     printf("\n");
 
-    savePointsToSCV("../sorted_steve_points.csv", arr, n);
+    savePointsToSCV("../sorted_steve_points2.csv", arr, n);
 
     return 0;
 }
