@@ -27,15 +27,45 @@ void insertionSort(struct Point arr[], int n, char coordinate, int ascending) {
         arr[j+1] = key;
     }
 }
-
-void rasterScanSort(struct Point arr[], int n, int eps) {
+void reverseRow(struct Point arr[], int rowStart, int rowEnd) {
+    while (rowStart < rowEnd) {
+        struct Point temp = arr[rowStart];
+        arr[rowStart] = arr[rowEnd];
+        arr[rowEnd] = temp;
+        rowStart++;
+        rowEnd--;
+    }
+}
+void reverseAlternateRowsOnXJump(struct Point arr[], int n, int xJumpThreshold) {
+    int rowStart = 0;
+    int reverseRowFlag = 0; // Flag to determine whether to reverse the row
+    
+    for (int i = 1; i < n; i++) {
+        if (abs(arr[i].x - arr[i - 1].x) >= xJumpThreshold) {
+            if (reverseRowFlag) {
+                // Reverse the points within the current row
+                int rowEnd = i - 1;
+                reverseRow(arr, rowStart, rowEnd);
+            }
+            reverseRowFlag = !reverseRowFlag; // Toggle the flag for next row
+            rowStart = i; // Set the new row starting point
+        }
+    }
+    
+    // Reverse the last row (if necessary and flagged)
+    if (reverseRowFlag) {
+        int rowEnd = n - 1;
+        reverseRow(arr, rowStart, rowEnd);
+    }
+}
+void rasterScanSort(struct Point arr[], int n, int dyThresh, int dxThresh) {
     insertionSort(arr, n, 'y', 0); // sort by y-coordinate descending
 
     int i = 0;
     int ascending = 1; // flag used to alternate ascending/descending sort
     while (i < n) {
         int j = i + 1;
-        while (j < n && abs(arr[j].y - arr[i].y) <= eps) { // consider rows to be points where dy<eps
+        while (j < n && abs(arr[j].y - arr[i].y) <= dyThresh) { // consider rows to be points where dy<dyThresh
             j++;
         }
         if (ascending) {
@@ -46,51 +76,9 @@ void rasterScanSort(struct Point arr[], int n, int eps) {
         ascending = !ascending; // reverse the flag
         i = j;
     }
+
+    reverseAlternateRowsOnXJump(arr, n, dxThresh); // create serpentine pattern by reversing alternate rows where dx>dxThresh
 }
-
-void reverseAlternateRowsOnXJump(struct Point arr[], int n, int xJumpThreshold) {
-    int rowStart = 0;
-    int reverseRow = 0; // Flag to determine whether to reverse the row
-    
-    for (int i = 1; i < n; i++) {
-        if (abs(arr[i].x - arr[i - 1].x) > xJumpThreshold) {
-            if (reverseRow) {
-                // Reverse the points within the current row
-                int rowEnd = i - 1;
-                while (rowStart < rowEnd) {
-                    struct Point temp = arr[rowStart];
-                    arr[rowStart] = arr[rowEnd];
-                    arr[rowEnd] = temp;
-                    rowStart++;
-                    rowEnd--;
-                }
-            }
-            reverseRow = !reverseRow; // Toggle the flag for next row
-            rowStart = i; // Set the new row starting point
-        }
-    }
-    
-    // Reverse the last row (if necessary and flagged)
-    if (reverseRow) {
-        int rowEnd = n - 1;
-        while (rowStart < rowEnd) {
-            struct Point temp = arr[rowStart];
-            arr[rowStart] = arr[rowEnd];
-            arr[rowEnd] = temp;
-            rowStart++;
-            rowEnd--;
-        }
-    }
-}
-
-
-
-void serpentineScanSort(struct Point arr[], int n, int eps) {
-    rasterScanSort(arr, n, eps);
-    reverseAlternateRowsOnXJump(arr, n, 1000);
-}
-
-
 
 void printArray(struct Point arr[], int n) {
     int i;
@@ -99,7 +87,6 @@ void printArray(struct Point arr[], int n) {
     }
     printf("\n");
 }
-
 void readPointsFromCSV(const char* filename, struct Point arr[], int n) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
@@ -112,7 +99,6 @@ void readPointsFromCSV(const char* filename, struct Point arr[], int n) {
     }
     fclose(file);
 }
-
 void savePointsToSCV(const char* filename, struct Point arr[], int n) {
     FILE* file = fopen(filename, "w");
     if (file == NULL) {
@@ -126,33 +112,19 @@ void savePointsToSCV(const char* filename, struct Point arr[], int n) {
     printf("Sorted points saved to %s\n", filename);
 }
 
-void generateRandomPoints(struct Point arr[], int n, int eps) {
-    for (int i = 0; i < n; i++) {
-        arr[i].x = rand();
-        arr[i].y = rand();
-    }
-}
-
-double timeFunction(void (*f)(struct Point arr[], int n, int eps), struct Point arr[], int n, int eps) {
+double timeFunction(void (*f)(struct Point arr[], int n, int dyThresh, int dxThresh), struct Point arr[], int n, int dyThresh, int dxThresh) {
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
-    (*f)(arr, n, eps);
+    (*f)(arr, n, dyThresh, dxThresh);
     clock_gettime(CLOCK_REALTIME, &end);
     double time_elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
     return time_elapsed;
 }
 
 int main(int argc, char *argv[]) {
-    const char* filename = "C:/Users/memerson/Documents/code/embedded-sort/steve-points2.csv";
+    const char* filename = "../steve-points2.csv";
 
-    // Generate random points and evaluate performance
-    // srand(time(NULL));
-    // int n = 1000;
-    // struct Point arr[n];
-    // double timer1_elapsed = timeFunction(generateRandomPoints, arr, n, 10);
-    // printf("Time to generate numbers: %f\n", timer1_elapsed);
-
-    // Alternatively, sort points from csv file
+    // Sort points from csv file
     int n = 211; // known number of points in csv
     struct Point arr[n];
     readPointsFromCSV(filename, arr, n);
@@ -161,8 +133,9 @@ int main(int argc, char *argv[]) {
     printArray(arr, n);
     printf("\n");
 
-    int eps = 1;
-    double time_elapsed = timeFunction(serpentineScanSort, arr, n, eps);
+    int dyThresh = 1;
+    int dxThresh = 1000;
+    double time_elapsed = timeFunction(rasterScanSort, arr, n, dyThresh, dxThresh);
 
     printf("Sorted Array: ");
     printArray(arr, n);
