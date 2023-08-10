@@ -34,31 +34,34 @@
 
 3. **Raster Scan Sort Function:**
    ```c
-   void rasterScanSort(struct Point arr[], int n, int eps) {
-       insertionSort(arr, n, 'y', 0); // sort by y-coordinate descending
+   void rasterScanSort(struct Point arr[], int n, int dyThresh, int dxThresh) {
+        insertionSort(arr, n, 'y', 0); // sort by y-coordinate descending
 
-       int i = 0;
-       int ascending = 1; // flag used to alternate ascending/descending sort
-       while (i < n) {
-           int j = i + 1;
-           while (j < n && abs(arr[j].y - arr[i].y) <= eps) { // consider rows to be points where dy<eps
-               j++;
-           }
-           if (ascending) {
-               insertionSort(&arr[i], j - i, 'x', 1); // sort x in row ascending 
-           } else {
-               insertionSort(&arr[i], j - i, 'x', 0); // sort x in row descending
-           }
-           ascending = !ascending; // reverse the flag
-           i = j;
-       }
-   }
+        int i = 0;
+        int ascending = 1; // flag used to alternate ascending/descending sort
+        while (i < n) {
+            int j = i + 1;
+            while (j < n && abs(arr[j].y - arr[i].y) <= dyThresh) { // consider rows to be points where dy<dyThresh
+                j++;
+            }
+            if (ascending) {
+                insertionSort(&arr[i], j-i, 'x', 1); // sort x in row ascending
+            } else {
+                insertionSort(&arr[i], j-i, 'x', 0); // sort x in row descending
+            }
+            ascending = !ascending; // reverse the flag
+            i = j;
+        }
+
+        reverseAlternateRowsOnXJump(arr, n, dxThresh); // create serpentine pattern by reversing alternate rows where dx>dxThresh
+    }
    ```
    This function sorts the array of `Point` structures using a raster scan approach. It first sorts all points based on the y-coordinate in descending order. Then, it iterates through the points, defining rows as points where the difference in y-coordinate (`dy`) is less than or equal to `eps`.
 
    Within each row, it alternates between sorting the points' x-coordinates in ascending or descending order based on the `ascending` flag. After sorting each row, it toggles the `ascending` flag and moves to the next row.
 
-Overall, this code effectively sorts an arbitrary number of 2D points based on the specified coordinate direction and order using insertion sort and the raster scan approach.
+   At the end, of this `while()` loop, alternate rows are reversed based on a jump in the x-coordinate. This jump defines what constitutes a new row. We reverse the row to create a serpentine pattern, removing 'carriage-returns'.
+
 
 **Unsorted Points**
 
